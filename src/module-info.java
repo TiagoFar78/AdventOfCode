@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author tiago
- *
- */
-module AoCChallenge {
-}
