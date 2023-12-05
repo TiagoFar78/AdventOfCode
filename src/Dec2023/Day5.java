@@ -3,6 +3,7 @@ package Dec2023;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -10,24 +11,69 @@ public class Day5 {
 	
 	private static Day5 day5 = new Day5();
 	
+	private class Range implements Comparable<Range> {
+		
+		private long _start;
+		private long _length;
+		
+		public Range(long start, long length) {
+			_start = start;
+			_length = length;
+		}
+		
+		public long getStart() {
+			return _start;
+		}
+		
+		public long getEnd() {
+			return _start + _length - 1;
+		}
+
+		@Override
+		public int compareTo(Range o) {
+			long comparison = _start - o._start;
+			if (comparison < Integer.MIN_VALUE) {
+				return -1;
+			}
+			
+			if (comparison > Integer.MAX_VALUE) {
+				return 1;
+			}
+			
+			return (int) (_start - o._start);
+		}
+	}
+	
 	private class RangeMap {
 		
-		private double _sourceStart;
-		private double _destinationStart;
-		private double _rangeLength;
+		private long _sourceStart;
+		private long _destinationStart;
+		private long _rangeLength;
 		
-		public RangeMap(double sourceStart, double destinationStart, double rangeLength) {
+		public RangeMap(long sourceStart, long destinationStart, long rangeLength) {
 			_sourceStart = sourceStart;
 			_destinationStart = destinationStart;
 			_rangeLength = rangeLength;
 		}
 		
-		public double map(double key) {
+		public long map(long key) {
 			if (key < _sourceStart || key >= _sourceStart + _rangeLength) {
 				return -1;
 			}
 			
 			return _destinationStart + key - _sourceStart;
+		}
+		
+		public long getRangeExpandability(Range range) {
+			if (range.getStart() < _sourceStart || range.getStart() > _sourceStart + _rangeLength - 1) {
+				return -1;
+			}
+			
+			return range.getEnd() >= _sourceStart + _rangeLength - 1 ? _sourceStart + _rangeLength - 1 : range.getEnd();
+		}
+		
+		public Range map(Range key) {
+			return day5.new Range(map(key.getStart()), key._length);
 		}
 	}
 	
@@ -39,15 +85,49 @@ public class Day5 {
 			_rangeMaps.add(rangeMap);
 		}
 		
-		public double map(double key) {
+		public long map(long key) {
 			for (RangeMap rangeMap : _rangeMaps) {
-				double value = rangeMap.map(key);
+				long value = rangeMap.map(key);
 				if (value != -1) {
 					return value;
 				}
 			}
 			
 			return key;
+		}
+		
+		public List<Range> map(Range key) {
+			List<Range> mappedRanges = new ArrayList<Range>();
+			
+			while (key != null) {
+				
+				boolean wasKeyChanged = false;
+				for (RangeMap rangeMap : _rangeMaps) {
+					long subrangeEnd = rangeMap.getRangeExpandability(key);
+					if (subrangeEnd != -1) {
+						Range splitedRange = day5.new Range(key.getStart(), subrangeEnd - key.getStart() + 1);
+						mappedRanges.add(rangeMap.map(splitedRange));
+						
+						if (subrangeEnd == key.getEnd()) {
+							wasKeyChanged = true;
+							key = null;
+							break;
+						}
+						else {
+							wasKeyChanged = true;
+							key = day5.new Range(subrangeEnd + 1, key.getEnd() - subrangeEnd + 1);
+							break;
+						}						
+					}
+				}
+				
+				if (!wasKeyChanged) {
+					mappedRanges.add(key);
+					break;
+				}
+			}
+			
+			return mappedRanges;
 		}
 	}
 	
@@ -59,14 +139,14 @@ public class Day5 {
 		solvePart2();
 	}
 	
-	private static List<Double> seeds = new ArrayList<Double>();
+	private static List<Long> seeds = new ArrayList<Long>();
 	private static List<SpecialMap> maps = new ArrayList<SpecialMap>();
 	
 	private static void solvePart1() {
-		double min = -1;
+		long min = -1;
 		
-		for (double seed : seeds) {
-			double key = seed;
+		for (long seed : seeds) {
+			long key = seed;
 			for (SpecialMap specialMap : maps) {
 				key = specialMap.map(key);
 			}
@@ -76,27 +156,37 @@ public class Day5 {
 			}
 		}
 		
-		System.out.printf("%f\n", min);
+		System.out.printf("%d\n", min);
 	}
 	
 	private static void solvePart2() {
-		double min = -1;
+		long min = -1;
 		
 		for (int i = 0; i < seeds.size(); i += 2) {
-			for (double key = seeds.get(i); key < seeds.get(i) + seeds.get(i + 1); key++) {
-				double mappingKey = key;
+			Range range = day5.new Range(seeds.get(i), seeds.get(i + 1));
+			
+			List<Range> mainRangesList = new ArrayList<Range>();
+			mainRangesList.add(range);
+			
+			for (SpecialMap specialMap : maps) {
+				List<Range> auxiliarRangesList = new ArrayList<Range>();
 				
-				for (SpecialMap specialMap : maps) {
-					mappingKey = specialMap.map(mappingKey);
+				for (Range subRange : mainRangesList) {
+					auxiliarRangesList.addAll(specialMap.map(subRange));
 				}
 				
-				if (min == -1 || mappingKey < min) {
-					min = mappingKey;
-				}
+				mainRangesList = auxiliarRangesList;
+			}
+			
+			Collections.sort(mainRangesList);
+			
+			long possibleMin = mainRangesList.get(0)._start;
+			if (min == -1 || possibleMin < min) {
+				min = possibleMin;
 			}
 		}
 		
-		System.out.printf("%f\n", min);
+		System.out.printf("%d\n", min);
 	}
 	
 	private static void initializeSeedsAndMaps() {
@@ -118,13 +208,13 @@ public class Day5 {
 	            	for (int i = seedsString.length(); i < line.length(); i++) {
 	            		String charAt = Character.toString(line.charAt(i));
 	            		
-	            		double doubleegerAt = stringToDouble(charAt);
-	            		if (doubleegerAt != -1) {
+	            		long longegerAt = stringTolong(charAt);
+	            		if (longegerAt != -1) {
 	            			numberComposition += charAt;
 	            		}
 	            		
 	            		if (charAt.equals(" ") || i == line.length() - 1) {
-	            			seeds.add(stringToDouble(numberComposition));
+	            			seeds.add(stringTolong(numberComposition));
 	            			numberComposition = "";
 	            		}
 	            	}
@@ -138,20 +228,20 @@ public class Day5 {
 	            	maps.add(specialMap);
 	            }
 	            else {
-	            	double sourceStart = -1;
-	            	double destinationStart = -1;
-	            	double rangeLength = -1;
+	            	long sourceStart = -1;
+	            	long destinationStart = -1;
+	            	long rangeLength = -1;
 	            	
 	            	for (int i = 0; i < line.length(); i++) {
 	            		String charAt = Character.toString(line.charAt(i));
 	            		
-	            		double doubleegerAt = stringToDouble(charAt);
-	            		if (doubleegerAt != -1) {
+	            		long longegerAt = stringTolong(charAt);
+	            		if (longegerAt != -1) {
 	            			numberComposition += charAt;
 	            		}
 	            		
 	            		if (charAt.equals(" ") || i == line.length() - 1) {
-	            			double number = stringToDouble(numberComposition);
+	            			long number = stringTolong(numberComposition);
 	            			if (sourceStart != -1) {
 	            				rangeLength = number;
 	            			}
@@ -183,9 +273,9 @@ public class Day5 {
 	    }
 	}
 
-	private static double stringToDouble(String s) {
+	private static long stringTolong(String s) {
 		try {
-			return Double.parseDouble(s);
+			return Long.parseLong(s);
 		} 
 		catch (Exception e) {
 			return -1;
