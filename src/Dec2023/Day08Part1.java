@@ -7,9 +7,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day8Part1 {
+public class Day08Part1 {
 	
-	private static Day8Part1 day8 = new Day8Part1();
+	private static Day08Part1 day8 = new Day08Part1();
 	
 	private static final String START_NODE = "AAA";
 	private static final String DESTINATION_NODE = "ZZZ";

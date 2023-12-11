@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day5 {
+public class Day05 {
 	
-	private static Day5 day5 = new Day5();
+	private static Day05 day5 = new Day05();
 	
 	private class Range implements Comparable<Range> {
 		

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day9Part1 {
+public class Day09Part1 {
 	
 	private static List<List<Integer>> histories;
 	

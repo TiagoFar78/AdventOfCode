@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day7Part1 {
+public class Day07Part2 {
 	
-	private static Day7Part1 day7 = new Day7Part1();
+	private static Day07Part2 day7 = new Day07Part2();
 	
 	private enum HandType {
 		FIVE_OF_A_KIND,
@@ -24,7 +24,7 @@ public class Day7Part1 {
 	private static HandType[] handTypeStrengthOrder = { HandType.HIGH_CARD, HandType.ONE_PAIR, HandType.TWO_PAIR, HandType.THREE_OF_A_KIND,
 			HandType.FULL_HOUSE, HandType.FOUR_OF_A_KIND, HandType.FIVE_OF_A_KIND};
 	
-	private static String[] cardStrenghtOrder = { "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A" };
+	private static String[] cardStrenghtOrder = { "J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A" };
  	
 	private static int getStrenght(HandType handType) {
 		for (int i = 0; i < handTypeStrengthOrder.length; i++) {
@@ -92,6 +92,33 @@ public class Day7Part1 {
 				return HandType.FIVE_OF_A_KIND;
 			}
 			
+			if (cards.contains("J")) {
+				int higherCardsIndex = 0;
+				int higherCards = 0;
+				for (int i = 0; i < amounts.size(); i++) {
+					if (!cards.get(i).equals("J") && amounts.get(i) > higherCards) {
+						higherCardsIndex = i;
+						higherCards = amounts.get(i);
+					}
+				}
+				
+				int jIndex = 0;
+				for (int i = 0; i < cards.size(); i++) {
+					if (cards.get(i).equals("J")) {
+						jIndex = i;
+						break;
+					}
+				}
+				
+				amounts.set(higherCardsIndex, amounts.get(higherCardsIndex) + amounts.get(jIndex));
+				amounts.remove(jIndex);
+				cards.remove(jIndex);
+			}
+			
+			if (amounts.size() == 1) {
+				return HandType.FIVE_OF_A_KIND;
+			}
+			
 			if (amounts.size() == 2 && (amounts.get(0) == 1 || amounts.get(0) == 4)) {
 				return HandType.FOUR_OF_A_KIND;
 			}
@@ -111,7 +138,7 @@ public class Day7Part1 {
 			if (amounts.size() == 4) {
 				return HandType.ONE_PAIR;
 			}
-			
+
 			return HandType.HIGH_CARD;
 		}
 		

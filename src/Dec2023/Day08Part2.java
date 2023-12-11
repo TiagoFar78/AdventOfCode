@@ -7,9 +7,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day8Part2 {
+public class Day08Part2 {
 	
-	private static Day8Part2 day8 = new Day8Part2();
+	private static Day08Part2 day8 = new Day08Part2();
 	
 	private static final int NODE_SIZE = 3;
 	

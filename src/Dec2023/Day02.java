@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class Day2 {
+public class Day02 {
 	
 	private static int RED_LIMIT = 12;
 	private static int GREEN_LIMIT = 13;
