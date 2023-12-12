@@ -48,125 +48,28 @@ public class Day10Part2 {
 
 		List<Position> startingPositions = getStartingPositions();
 		
-		Position previousFirstPosition = day10.new Position(startLine, startColumn);
-		Position currentFirstPosition = startingPositions.get(0);
+		Position previousPosition = day10.new Position(startLine, startColumn);
+		Position currentPosition = startingPositions.get(0);
 		
-		Position previousSecondPosition = day10.new Position(startLine, startColumn);
-		Position currentSecondPosition = startingPositions.get(1);
-		
-		leaveTrailBehind(previousFirstPosition, cleanSurface, "S");
-		
-		while (!currentFirstPosition.equals(currentSecondPosition) && !previousFirstPosition.equals(currentSecondPosition)) {
-			int line = currentFirstPosition.getLine();
-			int col = currentFirstPosition.getColumn();
-			
-			String charAt = Character.toString(surface.get(line).charAt(col));
-			
-			currentFirstPosition = getNextPosition(previousFirstPosition, charAt, currentFirstPosition);
-			
-			previousFirstPosition = day10.new Position(line, col);
-			
-			leaveTrailBehind(previousFirstPosition, cleanSurface, charAt);
-
-			line = currentSecondPosition.getLine();
-			col = currentSecondPosition.getColumn();
-			
+		String charAt = "";
+		while (!charAt.equals("S")) {
+			int line = currentPosition.getLine();
+			int col = currentPosition.getColumn();
 			charAt = Character.toString(surface.get(line).charAt(col));
 			
-			currentSecondPosition = getNextPosition(previousSecondPosition, charAt, currentSecondPosition);
+			currentPosition = getNextPosition(previousPosition, charAt, currentPosition);
 			
-			previousSecondPosition = day10.new Position(line, col);
+			previousPosition = day10.new Position(line, col);
 			
-			leaveTrailBehind(previousSecondPosition, cleanSurface, charAt);
+			leaveTrailBehind(previousPosition, cleanSurface, charAt);
 		}
-		
-		int currentLine = currentFirstPosition.getLine();
-		int currentCol = currentFirstPosition.getColumn();
-		String charAt = Character.toString(surface.get(currentLine).charAt(currentCol));
-		leaveTrailBehind(currentFirstPosition, cleanSurface, charAt);
-		
-//		System.out.println("Surface");
-//		for (String line : surface) {
-//			System.out.println(line);
-//		}
 		
 		replaceStartIcon(cleanSurface);
 		
+		insertInsideMark(cleanSurface, true);
+		insertInsideMark(cleanSurface, false);
+		
 		int sum = 0;
-		
-		for (int line = 0; line < cleanSurface.size(); line++) {
-			boolean isInsideTheLoop = false;
-			String enteredWallWithChar = "";
-			for (int col = 0; col < cleanSurface.get(line).length(); col++) {
-				charAt = Character.toString(cleanSurface.get(line).charAt(col));
-				
-				if (isInsideTheLoop && charAt.equals(".")) {
-					leaveTrailBehind(day10.new Position(line, col), cleanSurface, "I");
-				}
-				else if (charAt.equals("|")) {
-					isInsideTheLoop = !isInsideTheLoop;
-					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("7")) {
-					if (enteredWallWithChar.equals("F")) {
-						isInsideTheLoop = !isInsideTheLoop;
-					}
-//					else {
-//						isInsideTheLoop = true;
-//					}
-//					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("J")) {
-					if (enteredWallWithChar.equals("L")) {
-						isInsideTheLoop = !isInsideTheLoop;
-					}
-//					else {
-//						isInsideTheLoop = false;
-//					}
-					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("L") || charAt.equals("F")) {
-					enteredWallWithChar = charAt;
-					isInsideTheLoop = !isInsideTheLoop;
-				}
-			}
-		}
-		
-		for (int col = 0; col < cleanSurface.get(0).length(); col++) {
-			boolean isInsideTheLoop = false;
-			String enteredWallWithChar = "";
-			for (int line = 0; line < cleanSurface.size(); line++) {
-				charAt = Character.toString(cleanSurface.get(line).charAt(col));
-				
-				if (!isInsideTheLoop && charAt.equals("I")) {
-					leaveTrailBehind(day10.new Position(line, col), cleanSurface, ".");
-				}
-				
-				if (isInsideTheLoop && charAt.equals(".")) {
-					leaveTrailBehind(day10.new Position(line, col), cleanSurface, "I");
-				}
-				else if (charAt.equals("-")) {
-					isInsideTheLoop = !isInsideTheLoop;
-					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("L")) {
-					if (enteredWallWithChar.equals("F")) {
-						isInsideTheLoop = !isInsideTheLoop;
-					}
-					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("J")) {
-					if (enteredWallWithChar.equals("7")) {
-						isInsideTheLoop = !isInsideTheLoop;
-					}
-					enteredWallWithChar = "";
-				}
-				else if (charAt.equals("7") || charAt.equals("F")) {
-					enteredWallWithChar = charAt;
-					isInsideTheLoop = !isInsideTheLoop;
-				}
-			}
-		}
 		
 		for (String line : cleanSurface) {
 			for (int i = 0; i < line.length(); i++) {
@@ -177,12 +80,67 @@ public class Day10Part2 {
 			}
 		}
 		
-		System.out.println("Clean Surface");
-		for (String line : cleanSurface) {
-			System.out.println(line);
+		System.out.println(sum);
+	}
+	
+	private static void insertInsideMark(List<String> surface, boolean isHorizontal) {
+		int stopingIndex1 = isHorizontal ? surface.size() : surface.get(0).length();
+		int stopingIndex2 = !isHorizontal ? surface.size() : surface.get(0).length();
+		
+		List<String> wallStarter = new ArrayList<String>();
+		List<String> wallEnder = new ArrayList<String>();
+		if (isHorizontal) {
+			wallStarter.add("|");
+			wallStarter.add("F");
+			wallStarter.add("L");
+			wallEnder.add("7");
+			wallEnder.add("J");
+		}
+		else {
+			wallStarter.add("-");
+			wallStarter.add("F");
+			wallStarter.add("7");
+			wallEnder.add("L");
+			wallEnder.add("J");
 		}
 		
-		System.out.println(sum);
+		for (int i = 0; i < stopingIndex1; i++) {
+			boolean isInsideTheLoop = false;
+			String enteredWallWithChar = "";
+			for (int j = 0; j < stopingIndex2; j++) {
+				int line = isHorizontal ? i : j;
+				int col = !isHorizontal ? i : j;
+				String charAt = Character.toString(surface.get(line).charAt(col));
+				
+				if (isInsideTheLoop && charAt.equals(".")) {
+					leaveTrailBehind(day10.new Position(line, col), surface, "*");
+				}
+				else if (isInsideTheLoop && charAt.equals("*")) {
+					leaveTrailBehind(day10.new Position(line, col), surface, "I");
+				}
+				else if (charAt.equals(wallStarter.get(0))) {
+					isInsideTheLoop = !isInsideTheLoop;
+					enteredWallWithChar = "";
+				}
+				else if (charAt.equals(wallEnder.get(0))) {
+					if (enteredWallWithChar.equals(wallStarter.get(1))) {
+						isInsideTheLoop = !isInsideTheLoop;
+					}
+					enteredWallWithChar = "";
+				}
+				else if (charAt.equals(wallEnder.get(1))) {
+					if (enteredWallWithChar.equals(wallStarter.get(2))) {
+						isInsideTheLoop = !isInsideTheLoop;
+					}
+					enteredWallWithChar = "";
+				}
+				else if (charAt.equals(wallStarter.get(1)) || charAt.equals(wallStarter.get(2))) {
+					enteredWallWithChar = charAt;
+					isInsideTheLoop = !isInsideTheLoop;
+				}
+			}
+		}
+		
 	}
 	
 	private static void replaceStartIcon(List<String> surface) {
@@ -191,7 +149,7 @@ public class Day10Part2 {
 			if (line.contains("S")) {
 				for (int j = 0; j < line.length(); j++) {
 					if (Character.toString(line.charAt(j)).equals("S")) {
-						String newLine = line.substring(0, j) + "-" + line.substring(j + 1);
+						String newLine = line.substring(0, j) + getStartIconReplacement(surface, i, j) + line.substring(j + 1);
 						surface.set(i, newLine);
 						return;
 					}
@@ -200,23 +158,50 @@ public class Day10Part2 {
 		}
 	}
 	
-	private static boolean canCloseWall(String wallOpenedWith, String closingChar) {
-		if (wallOpenedWith.equals("F")) {
-			return closingChar.equals("7") || closingChar.equals("|");
+	private static String getStartIconReplacement(List<String> surface, int startLine, int startColumn) {
+		int[] lines = { startLine - 1, startLine, startLine + 1, startLine };
+		int[] cols = { startColumn, startColumn + 1, startColumn, startColumn - 1 };
+		String[][] connectedPipes = { { "|" , "7", "F" }, { "-", "7", "J" }, { "|", "J", "L" }, { "-", "F", "L" } };
+		String[][] possiblePipes = { { "|", "J", "L" }, { "-", "F", "L" }, { "|", "F", "7" }, { "-", "7", "J" } };
+		
+		List<String> selectedPipes = new ArrayList<String>();
+		
+		for (int i = 0; i < lines.length; i++) {
+			String charAt = Character.toString(surface.get(lines[i]).charAt(cols[i]));
+			
+			for (String pipe : connectedPipes[i]) {
+				if (charAt.equals(pipe)) {
+					for (String selectedPipe : possiblePipes[i]) {
+						selectedPipes.add(selectedPipe);
+					}
+					
+					break;
+				}
+			}
 		}
 		
-		return closingChar.equals("J") || closingChar.equals("|");
+		return getMostFrequentEntry(selectedPipes);
 	}
 	
-	
-	private static boolean areConnected(String pipe1, String pipe2, boolean isHorizontally) {
-		if (isHorizontally) {
-			return !(pipe1.equals("J") || pipe1.equals("7") || pipe1.equals("|")) &&
-					(pipe2.equals("7") || pipe2.equals("J") || pipe2.equals("-") || pipe2.equals("S"));
-		}
-		
-		return !(pipe1.equals("J") || pipe1.equals("L") || pipe1.equals("-")) &&
-				(pipe2.equals("J") || pipe1.equals("L") || pipe1.equals("|") || pipe2.equals("S"));
+	private static String getMostFrequentEntry(List<String> list) {
+		int max_count = 0;
+	    String maxfreq = "";
+	     
+	    for (int i = 0; i < list.size(); i++){
+	       int count = 0;
+	       for (int j = 0; j < list.size(); j++){
+	          if (list.get(i) == list.get(j)){
+	             count++;
+	          }
+	       }
+	      
+	       if (count > max_count){
+	          max_count = count;
+	          maxfreq = list.get(i);
+	       }
+	    }
+	    
+	    return maxfreq;
 	}
 	
 	private static List<String> initializeCleanSurface() {
@@ -246,47 +231,22 @@ public class Day10Part2 {
 	private static List<Position> getStartingPositions() {
 		List<Position> positions = new ArrayList<Position>();
 		
-		int line = startLine - 1;
-		int col = startColumn;
-		String charAt;
-		if (line > 0) {
-			charAt = Character.toString(surface.get(line).charAt(col));
-
-			if (charAt.equals("|") || charAt.equals("7") || charAt.equals("F")) {
-				positions.add(day10.new Position(line, col));
-			}
-		}
+		int[] lines = { startLine - 1, startLine, startLine + 1, startLine };
+		int[] cols = { startColumn, startColumn + 1, startColumn, startColumn - 1 };
+		String[][] connectedPipes = { { "|" , "7", "F" }, { "-", "7", "J" }, { "|", "J", "L" }, { "-", "F", "L" } };
 		
-		line = startLine;
-		col = startColumn + 1;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		if (col > 0 && col < surface.get(line).length())
-		if (charAt.equals("-") || charAt.equals("7") || charAt.equals("J")) {
-			positions.add(day10.new Position(line, col));
-			if (positions.size() == 2) {
-				return positions;
+		for (int i = 0; i < lines.length; i++) {
+			String charAt = Character.toString(surface.get(lines[i]).charAt(cols[i]));
+			
+			for (String pipe : connectedPipes[i]) {
+				if (charAt.equals(pipe)) {
+					positions.add(day10.new Position(lines[i], cols[i]));
+					break;
+				}
 			}
-		}
-		
-		line = startLine + 1;
-		col = startColumn;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		if (line < surface.size())
-		if (charAt.equals("|") || charAt.equals("J") || charAt.equals("L")) {
-			positions.add(day10.new Position(line, col));
+			
 			if (positions.size() == 2) {
-				return positions;
-			}
-		}
-		
-		line = startLine;
-		col = startColumn - 1;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		if (col > 0 && col < surface.get(line).length())
-		if (charAt.equals("-") || charAt.equals("F") || charAt.equals("L")) {
-			positions.add(day10.new Position(line, col));
-			if (positions.size() == 2) {
-				return positions;
+				break;
 			}
 		}
 		

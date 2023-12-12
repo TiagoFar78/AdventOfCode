@@ -81,44 +81,22 @@ public class Day10Part1 {
 	private static List<Position> getStartingPositions() {
 		List<Position> positions = new ArrayList<Position>();
 		
-		int line = startLine - 1;
-		int col = startColumn;
+		int[] lines = { startLine - 1, startLine, startLine + 1, startLine };
+		int[] cols = { startColumn, startColumn + 1, startColumn, startColumn - 1 };
+		String[][] connectedPipes = { { "|" , "7", "F" }, { "-", "7", "J" }, { "|", "J", "L" }, { "-", "F", "L" } };
 		
-		String charAt = Character.toString(surface.get(line).charAt(col));
-		if (charAt.equals("|") || charAt.equals("7") || charAt.equals("F")) {
-			positions.add(day10.new Position(line, col));
-		}
-		
-		line = startLine;
-		col = startColumn + 1;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		
-		if (charAt.equals("-") || charAt.equals("7") || charAt.equals("J")) {
-			positions.add(day10.new Position(line, col));
-			if (positions.size() == 2) {
-				return positions;
+		for (int i = 0; i < lines.length; i++) {
+			String charAt = Character.toString(surface.get(lines[i]).charAt(cols[i]));
+			
+			for (String pipe : connectedPipes[i]) {
+				if (charAt.equals(pipe)) {
+					positions.add(day10.new Position(lines[i], cols[i]));
+					break;
+				}
 			}
-		}
-		
-		line = startLine + 1;
-		col = startColumn;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		
-		if (charAt.equals("|") || charAt.equals("J") || charAt.equals("L")) {
-			positions.add(day10.new Position(line, col));
+			
 			if (positions.size() == 2) {
-				return positions;
-			}
-		}
-		
-		line = startLine;
-		col = startColumn - 1;
-		charAt = Character.toString(surface.get(line).charAt(col));
-		
-		if (charAt.equals("-") || charAt.equals("F") || charAt.equals("L")) {
-			positions.add(day10.new Position(line, col));
-			if (positions.size() == 2) {
-				return positions;
+				break;
 			}
 		}
 		
