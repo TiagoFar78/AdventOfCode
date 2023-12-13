@@ -18,7 +18,7 @@ public class Day12Part1 {
 		
 		for (int i = 0; i < springs.size(); i++) {
 			int a = countPossibleArrangements(springs.get(i), damagedSpringsCodes.get(i));
-//			System.out.println("Index " + i + ": " + a);
+			System.out.println("Index " + i + ": " + a);
 			possibleArrangements += a;
 		}
 		
@@ -77,21 +77,11 @@ public class Day12Part1 {
 		}
 		
 		if (spring.substring(0, damagedSpringsAmount).contains(".")) {
-			int firstDamagedSpringIndex = getFirstOccurenceOf(spring, "#");
-			if (firstDamagedSpringIndex == -1) {
-				firstDamagedSpringIndex = 0;
-			}
-			
-			if (spring.length() < firstDamagedSpringIndex + damagedSpringsAmount) {
-				return 0;
-			}
-			
-			if (spring.substring(firstDamagedSpringIndex, firstDamagedSpringIndex + damagedSpringsAmount).contains(".")) {
-				return 0;
-			}
+			int firstSpringIndexAfterDot = getFirstOccurenceOf(spring, ".") + 1;				
+			return countPossibleArrangements(spring.substring(firstSpringIndexAfterDot), damagedSpringsCodes);
 		}
 		
-		if (spring.length() == damagedSpringsAmount) {
+		if (spring.length() == damagedSpringsAmount) {			
 //			System.out.println("Deu 1");
 			return 1;
 		}
