@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day13Part1 {
+public class Day13Part2 {
 	
 	private static List<List<String>> patterns;
 	
@@ -49,35 +49,55 @@ public class Day13Part1 {
 	}
 	
 	private static int getLinesBeforeMirror(List<String> pattern, boolean isVertical, int size, int startOffset, int endOffset) {
+		int smuges = 0;
+		
 		for (int i = 0; ; i++) {
 			int baseLine = i + startOffset;
 			int mirrowedLine = size - 1 - i - endOffset;
 			
-			boolean isMirrowed = isVertical ? isMirrowed(pattern, baseLine, mirrowedLine) : isMirrowed(pattern.get(baseLine), pattern.get(mirrowedLine));
-			if (!isMirrowed || mirrowedLine - baseLine == 0) {
+			smuges += isVertical ? getSmuges(pattern, baseLine, mirrowedLine) : getSmuges(pattern.get(baseLine), pattern.get(mirrowedLine));
+			if (smuges > 1 || mirrowedLine - baseLine == 0) {
 				return 0;
 			}
 			
 			if (mirrowedLine - baseLine == 1) {
-				return baseLine + 1;
+				return smuges == 1 ? baseLine + 1 : 0;
 			}
 		}
 	}
 	
-	private static boolean isMirrowed(String line1, String line2) {
-		return line1.equals(line2);
+	private static int getSmuges(String line1, String line2) {
+		int smuges = 0;
+		
+		for (int i = 0; i < line1.length(); i++) {
+			String charAt1 = Character.toString(line1.charAt(i));
+			String charAt2 = Character.toString(line2.charAt(i));
+			if (!charAt1.equals(charAt2)) {
+				smuges++;
+				if (smuges == 2) {
+					return smuges;
+				}
+			}
+		}
+		
+		return smuges;
 	}
 	
-	private static boolean isMirrowed(List<String> pattern, int col1, int col2) {
+	private static int getSmuges(List<String> pattern, int col1, int col2) {
+		int smuges = 0;
+		
 		for (int i = 0; i < pattern.size(); i++) {
 			String charAt1 = Character.toString(pattern.get(i).charAt(col1));
 			String charAt2 = Character.toString(pattern.get(i).charAt(col2));
 			if (!charAt1.equals(charAt2)) {
-				return false;
+				smuges++;
+				if (smuges == 2) {
+					return smuges;
+				}
 			}
 		}
 		
-		return true;
+		return smuges;
 	}
 	
 	private static void initializePatterns() {
