@@ -55,14 +55,14 @@ public class Day12Part1 {
 		damagedSpringsCodes = new ArrayList<Integer>(damagedSpringsCodes);
 		if (damagedSpringsCodes.size() == 0) {
 			if (spring.length() == 0 || !spring.contains("#")) {
-//				System.out.println("Esta spring tá com " + spring + " e tamos a ver o code vazio, mas deu 1");
+				System.out.println("Esta spring tá com " + spring + " e tamos a ver o code vazio, mas deu 1");
 				return 1;
 			}
 			
 			return 0;
 		}
 
-//		System.out.println("Esta spring tá com " + spring + " e tamos a ver o code " + damagedSpringsCodes.get(0));
+		System.out.println("Esta spring tá com " + spring + " e tamos a ver o code " + damagedSpringsCodes.get(0));
 		
 		int damagedSpringsAmount = damagedSpringsCodes.get(0);
 		
@@ -82,7 +82,7 @@ public class Day12Part1 {
 		}
 		
 		if (spring.length() == damagedSpringsAmount) {			
-//			System.out.println("Deu 1");
+			System.out.println("Deu 1");
 			return 1;
 		}
 		
