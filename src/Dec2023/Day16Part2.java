@@ -8,21 +8,77 @@ import java.util.Scanner;
 
 public class Day16Part2 {
 	
+	private static List<String> mainGrid;
 	private static List<String> grid;
 	private static List<Integer> energinedTilesLine;
 	private static List<Integer> energizedTilesCol;
 	private static List<String> trail_register;
 	
 	public static void run() {
-		initializeGrid();
+		initializeMainGrid();
 		
-		beamFlow(1, 0, 0, 0);
+		int lines = mainGrid.size();
+		int cols = mainGrid.get(0).length();
 		
-		fillEnergizedTiles();
+		int maxEnergizedTiles = 0;
+
+		for (int i = 0; i < lines; i++) {
+			restoreVariables();
+			
+			beamFlow(1, 0, i, 0);
+			
+			fillEnergizedTiles();
+			
+			int energizedTiles = countEnergizedTiles();
+			
+			if (maxEnergizedTiles < energizedTiles) {
+				maxEnergizedTiles = energizedTiles;
+			}
+		}
+
+		for (int i = 0; i < lines; i++) {
+			restoreVariables();
+			
+			beamFlow(-1, 0, i, cols - 1);
+			
+			fillEnergizedTiles();
+			
+			int energizedTiles = countEnergizedTiles();
+			
+			if (maxEnergizedTiles < energizedTiles) {
+				maxEnergizedTiles = energizedTiles;
+			}
+		}
+
+		for (int i = 0; i < lines; i++) {
+			restoreVariables();
+			
+			beamFlow(0, 1, 0, i);
+			
+			fillEnergizedTiles();
+			
+			int energizedTiles = countEnergizedTiles();
+			
+			if (maxEnergizedTiles < energizedTiles) {
+				maxEnergizedTiles = energizedTiles;
+			}
+		}
+
+		for (int i = 0; i < lines; i++) {
+			restoreVariables();
+			
+			beamFlow(0, -1, lines - 1, i);
+			
+			fillEnergizedTiles();
+			
+			int energizedTiles = countEnergizedTiles();
+			
+			if (maxEnergizedTiles < energizedTiles) {
+				maxEnergizedTiles = energizedTiles;
+			}
+		}
 		
-		int energizedTiles = countEnergizedTiles();
-		
-		System.out.println(energizedTiles);
+		System.out.println(maxEnergizedTiles);
 	}
 	
 	private static void beamFlow(int horizontalDirectionFrom, int verticalDirectionFrom, int line, int col) {
@@ -39,8 +95,6 @@ public class Day16Part2 {
 		energinedTilesLine.add(line);
 		energizedTilesCol.add(col);
 		trail_register.add(trail);
-		
-//		System.out.println("Horizontal: " + horizontalDirectionFrom + ", Vertical: " + verticalDirectionFrom + ", Line: " + line + ", Col: " + col);
 		String charAt = Character.toString(grid.get(line).charAt(col));
 		
 		if (charAt.equals(".")) {			
@@ -128,18 +182,32 @@ public class Day16Part2 {
 		return energizedTiles;
 	}
 	
-	private static void initializeGrid() {
-		grid = new ArrayList<String>();
+	private static void restoreVariables() {
+		grid = cloneList(mainGrid);
 		energinedTilesLine = new ArrayList<Integer>();
 		energizedTilesCol = new ArrayList<Integer>();
 		trail_register = new ArrayList<String>();
+	}
+	
+	private static List<String> cloneList(List<String> list) {
+		List<String> clonedList = new ArrayList<String>();
+		
+		for (String element : list) {
+			clonedList.add(element.substring(0));
+		}
+		
+		return clonedList;
+	}
+	
+	private static void initializeMainGrid() {
+		mainGrid = new ArrayList<String>();
 		
 		try {
 	        File myObj = new File("InputFiles/16.txt");
 	        Scanner myReader = new Scanner(myObj);
 	        while (myReader.hasNextLine()) {	        	
 	            String line = myReader.nextLine();
-	            grid.add(line);
+	            mainGrid.add(line);
 	        }
 	        
 	        myReader.close();
