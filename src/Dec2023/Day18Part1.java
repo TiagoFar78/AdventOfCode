@@ -84,11 +84,6 @@ public class Day18Part1 {
 		insertInsideMark(terrain, true);
 		insertInsideMark(terrain, false);
 		
-		System.out.println("Terrain: ");
-		for (String a : terrain) {
-			System.out.println(a);
-		}
-		
 		int sum = 0;
 		
 		for (String line : terrain) {
