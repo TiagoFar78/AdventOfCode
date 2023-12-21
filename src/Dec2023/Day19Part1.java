@@ -224,8 +224,6 @@ public class Day19Part1 {
 		catch (FileNotFoundException e) {
 	        e.printStackTrace();
 	    }
-		
-//		printSystem();
 	}
 
 	private static int stringToInt(String s) {
@@ -234,17 +232,6 @@ public class Day19Part1 {
 		} 
 		catch (Exception e) {
 			return -1;
-		}
-	}
-	
-	private static void printSystem() {
-		System.out.println("Workflows");
-		for (String name : _workflows.keySet()) {
-			System.out.println(name + ":");
-			for (Rule rule : _workflows.get(name)._rules) {
-				System.out.println("- " + rule._category.toString() + " " + rule._value + " -> " + rule.getDestination());
-			}
-			System.out.println("-> " + _workflows.get(name)._finalDestination);
 		}
 	}
 	
