@@ -7,11 +7,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day20Part1 {
+public class Day20Part2 {
 	
-	private static final int CLICKS = 1000;
-	
-	private static Day20Part1 day20 = new Day20Part1();
+	private static Day20Part2 day20 = new Day20Part2();
 	
 	private enum Pulse {
 		
@@ -103,24 +101,50 @@ public class Day20Part1 {
 	
 	public static void run() {
 		initializeModules();
+		long vdCount = countButtonClicksUntilTarget("vd", Pulse.HIGH);
 		
-		int lowPulsesSent = 0;
-		int highPulsesSent = 0;
-		List<Integer> lowPulsesSentByEachClick = new ArrayList<Integer>();
-		List<Integer> highPulsesSentByEachClick = new ArrayList<Integer>();
+		initializeModules();
+		long nsCount = countButtonClicksUntilTarget("ns", Pulse.HIGH);
+
+		initializeModules();
+		long bhCount = countButtonClicksUntilTarget("bh", Pulse.HIGH);
+
+		initializeModules();
+		long dlCount = countButtonClicksUntilTarget("dl", Pulse.HIGH);
 		
-		int buttonClicks = 0;
-		List<String> pulsePropagationLog = new ArrayList<String>();
-		int buttonsClicksLog = 0;
-		List<String> pulsePropagationComparator = new ArrayList<String>();
-		int buttonClicksComparator = 0;
+		long lcm1 = lcm(vdCount, nsCount);
+		long lcm2 = lcm(lcm1, bhCount);
+		long lcm3 = lcm(lcm2, dlCount);
+		
+		System.out.println(lcm3);
+	}
+	
+	public static long lcm(long number1, long number2) {
+	    if (number1 == 0 || number2 == 0) {
+	        return 0;
+	    }
+	    
+	    long absHigherNumber = Math.max(number1, number2);
+	    long absLowerNumber = Math.min(number1, number2);
+	    long lcm = absHigherNumber;
+	    
+	    while (lcm % absLowerNumber != 0) {
+	        lcm += absHigherNumber;
+	    }
+	    
+	    return lcm;
+	}
+	
+	private static long countButtonClicksUntilTarget(String targetName, Pulse targetPulse) {
+ 		long buttonClicks = 0;
 		
 		List<String> modulesQueue = new ArrayList<String>();
 		List<Pulse> pulsesQueue = new ArrayList<Pulse>();
 		
-		while (buttonClicks < CLICKS) {
+		boolean findTarget = false;
+		
+		while (!findTarget) {
 			buttonClicks++;
-			buttonClicksComparator++;
 			
 			modulesQueue.add("button");
 			pulsesQueue.add(Pulse.LOW);
@@ -130,8 +154,19 @@ public class Day20Part1 {
 				Module currentModule = modules.get(currentModuleName);
 				Pulse currentPulse = pulsesQueue.get(0);
 				
+				if (currentModule == null) {
+					modulesQueue.remove(0);
+					pulsesQueue.remove(0);
+					continue;
+				}
+				
 				Pulse nextPulse = currentModule.propagatePulse(currentPulse);
 				List<String> nextModulesNames = currentModule.getDestinationModules();
+				
+				if (currentModuleName.equals(targetName) && nextPulse == targetPulse) {
+					findTarget = true;
+					break;
+				}
 				
 				if (nextPulse != null) {
 					for (String nextModuleName : nextModulesNames) {
@@ -141,80 +176,17 @@ public class Day20Part1 {
 							((Conjunction) nextModel).senderPropagatedPulse(currentModuleName, nextPulse);
 						}
 						
-						if (nextModel != null) {
-							modulesQueue.add(nextModuleName);
-							pulsesQueue.add(nextPulse);
-						}
-						
-						pulsePropagationComparator.add(currentModuleName + " -" + nextPulse.toString().toLowerCase() + "-> " + nextModuleName);
-					}
-					
-					if (nextPulse == Pulse.LOW) {
-						int valueBefore = lowPulsesSentByEachClick.size() == 0 ? 0 : lowPulsesSentByEachClick.get(lowPulsesSentByEachClick.size() - 1);
-						lowPulsesSentByEachClick.add(valueBefore + nextModulesNames.size());
-						
-						lowPulsesSent += nextModulesNames.size();
-					}
-					else {
-						int valueBefore = highPulsesSentByEachClick.size() == 0 ? 0 : highPulsesSentByEachClick.get(highPulsesSentByEachClick.size() - 1);
-						highPulsesSentByEachClick.add(valueBefore + nextModulesNames.size());
-						
-						highPulsesSent += nextModulesNames.size();
+						modulesQueue.add(nextModuleName);
+						pulsesQueue.add(nextPulse);
 					}
 				}
 				
 				modulesQueue.remove(0);
 				pulsesQueue.remove(0);
 			}
-			
-			if (buttonsClicksLog == buttonClicksComparator) {
-				if (equals(pulsePropagationLog, pulsePropagationComparator)) {
-					break;
-				}
-				else {
-					buttonsClicksLog += buttonClicksComparator;
-					buttonClicksComparator = 0;
-					pulsePropagationLog.addAll(pulsePropagationComparator);
-					pulsePropagationComparator.clear();
-				}
-			}
-			else if (buttonsClicksLog < buttonClicksComparator) {
-				buttonsClicksLog += buttonClicksComparator;
-				buttonClicksComparator = 0;
-				pulsePropagationLog.addAll(pulsePropagationComparator);
-				pulsePropagationComparator.clear();
-			}
 		}
 		
-		int clicksPerCycle = buttonClicks / 2;
-		
-		int cyclesUntilLastClick = CLICKS / clicksPerCycle;
-		int rest = CLICKS % clicksPerCycle;
-		
-		int lowPulsesSentPerCycle = lowPulsesSent / 2;
-		int highPulsesSentPerCycle = highPulsesSent / 2;
-		
-		int totalLowPulsesSent = lowPulsesSentPerCycle * cyclesUntilLastClick;
-		int totalHighPulsesSent = highPulsesSentPerCycle * cyclesUntilLastClick;
-		
-		if (rest > 0) {
-			totalLowPulsesSent = lowPulsesSentByEachClick.get(rest - 1);
-			totalHighPulsesSent = highPulsesSentByEachClick.get(rest - 1);
-		}
-		
-		long totalPulses = totalLowPulsesSent * totalHighPulsesSent;
-		
-		System.out.println(totalPulses);
-	}
-	
-	private static boolean equals(List<String> l1, List<String> l2) {
-		for (int i = 0; i < l1.size(); i++) {
-			if (!l1.get(i).equals(l2.get(i))) {
-				return false;
-			}
-		}
-		
-		return true;
+		return buttonClicks;
 	}
 	
 	private static void initializeModules() {
