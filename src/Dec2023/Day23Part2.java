@@ -3,7 +3,6 @@ package Dec2023;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
@@ -32,14 +31,11 @@ public class Day23Part2 {
 
 	private static List<String> map;
 	
-	private static Hashtable<Integer, Integer> registeredPathsLength = new Hashtable<Integer, Integer>();
-	
-	private static int positionsToKey(int currentLine, int currentCol, int prevLine, int prevCol) {
-		int a = currentLine * 150 * 150 * 150 + currentCol * 150 * 150 + + prevLine * 150 + prevCol;
-		
-		System.out.println("Pos to (" + currentLine + ", " + currentCol + ") e pos from (" + prevLine + ", " + prevCol + ") tem key " + a);
-		return currentLine * 150 * 150 * 150 + currentCol * 150 * 150 + + prevLine * 150 + prevCol;
-	}
+//	private static Hashtable<Integer, Integer> registeredPathsLength = new Hashtable<Integer, Integer>();
+//	
+//	private static int positionsToKey(int currentLine, int currentCol, int prevLine, int prevCol) {
+//		return currentLine * 150 * 150 * 150 + currentCol * 150 * 150 + + prevLine * 150 + prevCol;
+//	}
 	
 	public static void run() {
 		System.out.println("Startou");
@@ -54,8 +50,6 @@ public class Day23Part2 {
 		System.out.println(largerPathTiles);
 	}
 	
-	private static int aaLine = 9;
-	private static int aaCol = 14;
 	private static int largerPathTiles(List<String> map, int line, int col) {
 		int tiles = 0;
 		
