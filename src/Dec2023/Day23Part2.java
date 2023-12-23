@@ -3,12 +3,33 @@ package Dec2023;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
 public class Day23Part2 {
 	
 	private static Day23Part2 day23 = new Day23Part2();
+	
+	private class PathToNode {
+		
+		private Position _pos;
+		private int _pathLength;
+		
+		public PathToNode(Position pos, int pathLength) {
+			_pos = pos;
+			_pathLength = pathLength;
+		}
+		
+		public Position getPos() {
+			return _pos;
+		}
+		
+		public int getPathLength() {
+			return _pathLength;
+		}
+		
+	}
 	
 	private class Position {
 		
@@ -31,83 +52,59 @@ public class Day23Part2 {
 
 	private static List<String> map;
 	
-//	private static Hashtable<Integer, Integer> registeredPathsLength = new Hashtable<Integer, Integer>();
-//	
-//	private static int positionsToKey(int currentLine, int currentCol, int prevLine, int prevCol) {
-//		return currentLine * 150 * 150 * 150 + currentCol * 150 * 150 + + prevLine * 150 + prevCol;
-//	}
+	private static List<Integer> completedNodes;
+	private static Hashtable<Integer, List<PathToNode>> nodes;
+	
+	private static int positionToKey(int currentLine, int currentCol) {
+		return currentLine * 150 + currentCol;
+	}
 	
 	public static void run() {
-		System.out.println("Startou");
 		initializeMap();
-		
 		removeSlopes(map);
 		
 		int startingCol = getStartCol(map);
 		
-		int largerPathTiles = largerPathTiles(map, 0, startingCol);
+		initializeNodes();
+		
+		int largerPathTiles = largerPathTiles(new ArrayList<Integer>(), 0, startingCol, 0);
 		
 		System.out.println(largerPathTiles);
 	}
 	
-	private static int largerPathTiles(List<String> map, int line, int col) {
-		int tiles = 0;
+	private static int largerPathTiles(List<Integer> visitedNodes, int line, int col, int tiles) {
+		int currentPositionKey = positionToKey(line, col);
 		
-		while (true) {
-			tiles++;
-			setOnMap(map, line, col, "O");
-			
-			List<Position> possibleDirections = getPossibleDirections(map, line, col);
-			
-			if (possibleDirections.size() == 0) {
-				return line == map.size() - 1 ? tiles - 1 : 0;
-			}
-			
-			if (possibleDirections.size() > 1) {
-				int largerPathTiles = 0;
-				
-				for (Position pos : possibleDirections) {
-					
-					int pathTiles;
-					
-					List<String> clonedMap = cloneList(map);
-					
-					pathTiles = largerPathTiles(clonedMap, pos.getLine(), pos.getCol());
-					
-					if (pathTiles > largerPathTiles) {
-						largerPathTiles = pathTiles;
-					}
-				}
-				
-				return largerPathTiles == 0 ? 0 : tiles + largerPathTiles;
-			}
-			
-			line = possibleDirections.get(0).getLine();
-			col = possibleDirections.get(0).getCol();
-		}
-	}
-	
-	private static List<Position> getPossibleDirections(List<String> map, int line, int col) {
-		List<Position> positions = new ArrayList<Position>();
+		visitedNodes.add(currentPositionKey);
 		
-		int[] lines = { line - 1, line, line + 1, line };
-		int[] cols = { col, col + 1, col, col - 1 };
-		String[][] slopes = { { ">" }, { ">", "v" }, { "v", ">" }, { "v" } };
-		
-		for (int i = 0; i < lines.length; i++) {
-			if (lines[i] < 0 || lines[i] >= map.size() || cols[i] < 0 || cols[i] >= map.get(0).length()) {
-				continue;
-			}
-			
-			String charAt = Character.toString(map.get(lines[i]).charAt(cols[i]));
-			if (charAt.equals(".") || contains(slopes[i], charAt)) {
-				positions.add(day23.new Position(lines[i], cols[i]));
+		List<PathToNode> allNodes = nodes.get(currentPositionKey);
+		List<PathToNode> possibleNodes = new ArrayList<PathToNode>();
+		for (PathToNode pathToNode : allNodes) {
+			Position pos = pathToNode.getPos();
+			if (!visitedNodes.contains(positionToKey(pos.getLine(), pos.getCol()))) {
+				possibleNodes.add(pathToNode);
 			}
 		}
 		
-		return positions;
+		if (possibleNodes.size() == 0) {
+			return line == map.size() - 1 ? tiles : 0;
+		}
+		
+		int largerPathTiles = 0;
+		for (PathToNode pathToNode : possibleNodes) {
+			Position pos = pathToNode.getPos();
+			
+			List<Integer> clonedVisistedNodes = cloneListInteger(visitedNodes);
+			int pathTiles = largerPathTiles(clonedVisistedNodes, pos.getLine(), pos.getCol(), tiles + pathToNode.getPathLength());
+			if (pathTiles > largerPathTiles) {
+				largerPathTiles = pathTiles;
+			}
+			
+		}
+		
+		return largerPathTiles;
 	}
-	
+
 	private static boolean contains(String[] list, String element) {
 		for (String o : list) {
 			if (o.equals(element)) {
@@ -140,12 +137,146 @@ public class Day23Part2 {
 		return clonedList;
 	}
 	
+	private static List<Integer> cloneListInteger(List<Integer> list) {
+		List<Integer> clonedList = new ArrayList<Integer>();
+		
+		for (Integer element : list) {			
+			clonedList.add(element);
+		}
+		
+		return clonedList;
+	}
+	
 	private static void setOnMap(List<String> map, int line, int col, String element) {
 		String prevLine = map.get(line);
 		
 		String nextLine = prevLine.substring(0, col) + element + prevLine.substring(col + 1);
  		
 		map.set(line, nextLine);
+	}
+	
+	private static void initializeNodes() {
+		nodes = new Hashtable<Integer, List<PathToNode>>();
+		completedNodes = new ArrayList<Integer>();
+		
+		int startingCol = getStartCol(map);
+		initializeNodes(map, 0, startingCol, null);
+	}
+	
+	private static void initializeNodes(List<String> map, int line, int col, Position startingPos) {
+		int tiles = 0;
+		
+		int startingLine = line;
+		int startingCol = col;
+		
+		if (startingPos == null) {
+			startingLine = line;
+			startingCol = col;
+			startingPos = day23.new Position(line, col);
+		}
+		else {
+			startingLine = startingPos.getLine();
+			startingCol = startingPos.getCol();
+		}
+		
+		while (true) {
+			tiles++;
+			setOnMap(map, line, col, "O");
+			
+			List<Position> possibleDirections = getPossibleDirections(map, line, col);
+			if (possibleDirections == null) {
+				break;
+			}
+			
+			if (possibleDirections.size() == 0) {
+				PathToNode pathToNode1 = day23.new PathToNode(day23.new Position(line, col), tiles - 1);
+				PathToNode pathToNode2 = day23.new PathToNode(startingPos, tiles - 1);
+				
+				addToNodes(startingLine, startingCol, pathToNode1);
+				addToNodes(line, col, pathToNode2);
+				
+				break;
+			}
+			
+			if (possibleDirections.size() > 1) {
+				PathToNode pathToNode1 = day23.new PathToNode(day23.new Position(line, col), tiles);
+				PathToNode pathToNode2 = day23.new PathToNode(startingPos, tiles);
+				
+				addToNodes(startingLine, startingCol, pathToNode1);
+				addToNodes(line, col, pathToNode2);
+				
+				if (!completedNodes.contains(positionToKey(line, col))) {
+					for (Position pos : possibleDirections) {					
+						List<String> clonedMap = cloneList(map);
+						
+						initializeNodes(clonedMap, pos.getLine(), pos.getCol(), day23.new Position(line, col));
+					}
+				}
+				
+				break;
+			}
+			
+			line = possibleDirections.get(0).getLine();
+			col = possibleDirections.get(0).getCol();
+		}	
+		
+		completedNodes.add(positionToKey(startingLine, startingCol));
+	}
+	
+	private static void addToNodes(int line, int col, PathToNode pathToNode) {
+		int key = positionToKey(line, col);
+		
+		List<PathToNode> paths;
+		
+		if (nodes.containsKey(key)) {
+			paths = nodes.get(key);
+		}
+		else {
+			paths = new ArrayList<PathToNode>();
+			nodes.put(key, paths);
+		}
+		
+		if (!contains(paths, pathToNode)) {
+			paths.add(pathToNode);
+		}
+	}
+	
+	private static boolean contains(List<PathToNode> list, PathToNode element) {
+		for (PathToNode path : list) {
+			if (path.getPos().getLine() == element.getPos().getLine() &&
+					path.getPos().getCol() == element.getPos().getCol() && path.getPathLength() == element.getPathLength()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private static List<Position> getPossibleDirections(List<String> map, int line, int col) {
+		List<Position> positions = new ArrayList<Position>();
+		
+		int[] lines = { line - 1, line, line + 1, line };
+		int[] cols = { col, col + 1, col, col - 1 };
+		String[][] slopes = { { ">" }, { ">", "v" }, { "v", ">" }, { "v" } };
+		
+		int oCount = 0;
+		
+		for (int i = 0; i < lines.length; i++) {
+			if (lines[i] < 0 || lines[i] >= map.size() || cols[i] < 0 || cols[i] >= map.get(0).length()) {
+				continue;
+			}
+			
+			String charAt = Character.toString(map.get(lines[i]).charAt(cols[i]));
+			if (charAt.equals(".") || contains(slopes[i], charAt)) {
+				positions.add(day23.new Position(lines[i], cols[i]));
+			}
+			
+			if (charAt.equals("O")) {
+				oCount++;
+			}
+		}
+		
+		return oCount >= 2 ? null : positions;
 	}
 	
 	private static void initializeMap() {
