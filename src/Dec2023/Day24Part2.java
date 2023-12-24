@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Day24Part1 {
+public class Day24Part2 {
 	
 	private static final Long MIN_TEST_BOUNDARY = 200000000000000L;
 	private static final Long MAX_TEST_BOUNDARY = 400000000000000L;
 
-	private static Day24Part1 day24 = new Day24Part1();
+	private static Day24Part2 day24 = new Day24Part2();
 	
 	private class Hailstone {
 		
@@ -19,12 +19,16 @@ public class Day24Part1 {
 		private long _vx;
 		private long _py;
 		private long _vy;
+		private long _pz;
+		private long _vz;
 		
-		public Hailstone(long px, long vx, long py, long vy) {
+		public Hailstone(long px, long vx, long py, long vy, long pz, long vz) {
 			_px = px;
 			_vx = vx;
 			_py = py;
 			_vy = vy;
+			_pz = pz;
+			_vz = vz;
 		}
 		
 		public double calculateXPosition(double time) {
@@ -34,6 +38,10 @@ public class Day24Part1 {
 		public double calculateYPosition(double time) {
 			return (double) _py + (double) _vy * time;
 		}
+		
+//		public double calculateZPosition(double time) {
+//			return (double) _pz + (double) _vz * time;
+//		}
 		
 		public double getIntersectionTime(Hailstone o) {
 			double possibleZero = _vy - o._vy * _vx / o._vx;
@@ -52,6 +60,11 @@ public class Day24Part1 {
 			return otherPathTime;
 		}
 		
+		@Override
+		public String toString() {
+			return _px + ", " + _py + ", " + _pz + " @ " + _vx + ", " + _vy + ", " + _vz;
+		}
+		
 	}
 	
 	private static List<Hailstone> hailstones;
@@ -65,10 +78,27 @@ public class Day24Part1 {
 			Hailstone hailstone = hailstones.get(i);
 			
 			for (int j = i + 1; j < hailstones.size(); j++) {
+				System.out.print("Hailstone A: ");
+				System.out.println(hailstone.toString());
+				System.out.print("Hailstone B: ");
+				System.out.println(hailstones.get(j).toString());
+				
 				double intersectionTime = hailstone.getIntersectionTime(hailstones.get(j));
 				double otherPathIntersectionTime = hailstone.getOtherPathIntersectionTime(hailstones.get(j), intersectionTime);
 				
-				if (intersectionTime <= 0 || otherPathIntersectionTime < 0) {
+				if (intersectionTime == 0) {
+					System.out.println("Hailstones' paths are parallel; they never intersect.");
+					System.out.println();
+					continue;
+				}
+				else if (intersectionTime < 0) {
+					System.out.println("Hailstones paths crossed in the past for hailstone A.");
+					System.out.println();
+					continue;
+				}
+				else if (otherPathIntersectionTime < 0) {
+					System.out.println("Hailstones paths crossed in the past for hailstone B.");
+					System.out.println();
 					continue;
 				}
 				
@@ -78,7 +108,13 @@ public class Day24Part1 {
 				if (intersectionX >= MIN_TEST_BOUNDARY && intersectionX <= MAX_TEST_BOUNDARY &&
 						intersectionY >= MIN_TEST_BOUNDARY && intersectionY <= MAX_TEST_BOUNDARY) {
 					totalIntersections++;
+					System.out.println("Hailstones paths will cross inside the test area (at x=" + intersectionX + ", y=" + intersectionY + ").");
 				}
+				else {
+					System.out.println("Hailstones paths will cross outside the test area (at x=" + intersectionX + ", y=" + intersectionY + ").");
+				}
+				
+				System.out.println();
 			}
 		}
 		
@@ -103,7 +139,7 @@ public class Day24Part1 {
 	            String[] vCoords = vPart.split(", ");
 	            
 	            Hailstone hailstone = day24.new Hailstone(stringToLong(pCoords[0]), stringToLong(vCoords[0]),
-	            		stringToLong(pCoords[1]), stringToLong(vCoords[1]));
+	            		stringToLong(pCoords[1]), stringToLong(vCoords[1]), stringToLong(pCoords[2]), stringToLong(vCoords[2]));
 	            hailstones.add(hailstone);
 	        }
 	        
