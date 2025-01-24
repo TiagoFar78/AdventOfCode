@@ -6,9 +6,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Run {
+    
+    public static final int YEAR = Year.now().getValue();
 
     public static void main(String[] args) {
-        String packageName = "Dec" + Year.now().getValue();
+        String packageName = "year" + YEAR;
         String className = challengeToSolve(packageName);
 
         try {
