@@ -16,7 +16,7 @@ public class Run {
         try {
             Class<?> clazz = Class.forName(packageName + "." + className);
             Challenge challenge = (Challenge) clazz.getDeclaredConstructor().newInstance();
-            System.out.println(challenge.solve());
+            System.out.println(challenge.solveString());
         } catch (ClassNotFoundException e) {
             System.err.println("Class not found: " + className);
         } catch (Exception e) {
