@@ -36,7 +36,6 @@ public class Day23Part1 extends Challenge {
     
     @Override
     public long solve() {
-        System.out.println("a");
         List<int[]> nanobots = new ArrayList<>();
         
         Pattern pattern = Pattern.compile("pos=<(-?\\d+),(-?\\d+),(-?\\d+)>, r=(\\d+)");
