@@ -16,46 +16,18 @@ public class Day24Part1 extends Challenge {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (gridList.get(i).charAt(j) == '#') {
-                    System.out.println("Adicionou " + (i * n + j));
                     grid |= 1 << (i * n + j);
                 }
             }
         }
         
-        print(grid);
-        
         Set<Integer> seen = new HashSet<>();
         while (!seen.contains(grid)) {
             seen.add(grid);
             grid = updateGrid(grid, n);
-//            k++;
-//            print(grid);
         }
         
         return grid;
-    }
-    
-    private void print(int grid) {
-        int[] gridArray = new int[25];
-        int size = 0;
-        while (grid > 0) {
-            gridArray[size] = grid % 2;
-            grid /= 2;
-            size++;
-        }
-        
-        for (int i = size; i < 25; i++) {
-            gridArray[i] = 0;
-        }
-        
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                System.out.print(gridArray[i * 5 + j] == 1 ? '#' : '.');
-            }
-            System.out.println();
-        }
-        
-        System.out.println();
     }
     
     private int updateGrid(int grid, int n) {
@@ -92,7 +64,6 @@ public class Day24Part1 extends Challenge {
 
     @Override
     public long solve() {
-        System.out.println("a");
         List<String> grid = new ArrayList<>();
         
         Scanner reader = getInputFile();
